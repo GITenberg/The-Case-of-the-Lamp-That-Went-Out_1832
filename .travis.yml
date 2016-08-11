@@ -1,0 +1,61 @@
+sudo: required
+dist: trusty
+language: ruby
+
+before_install:
+before_install:
+- gem install asciidoctor -v 1.5.2
+- gem install tilt
+- sudo pip install git+https://github.com/gitenberg-dev/gitberg
+- sudo pip install pillow
+- sudo pip install cssutils
+- sudo pip install docutils
+- sudo pip install roman
+- sudo pip install git+https://github.com/gitenberg-dev/pg-epubmaker
+script:
+- VERSION=`ruby -e "require 'yaml'; meta = YAML.load_file('metadata.yaml'); puts meta['_version'];"`
+- git clone https://github.com/gitenberg-dev/asciidoctor-htmlbook.git
+- sudo pip install -r asciidoctor-htmlbook/gitberg-machine/requirements.txt
+
+- /usr/bin/python -c "from gitenberg import travis; travis.build_epub()"
+- ebook-convert book.epub book.mobi
+- xvfb-run ebook-convert book.epub book.pdf
+branches:
+  only:
+  - master
+notifications:
+  webhooks:
+    urls:
+      - https://unglue.it/api/travisci/webhook
+    on_success: always
+    on_failure: never
+    on_start: never
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: btspNOTV48RvSeA2fEdHPraAsXIQpID+jsrZ223IMzJlQvi4fe+kSLzloY/Mw7UpGMoI5hZILKWbjutwPIOzDPypYs0Vbu6PSi61oTchzmnmis9/p8PfVZrfW8hpmzgxYk2sWLCwgIGLgbJXO8xIj7IqGVtHWvCkuUMrcZ998PjokisSo7g9fo0iVGFRWBnYgs13FLEKzEMl/Ruha0gwuAT/6L33xdopxedBGSXDAJjlacMLvia40CS2mQtsaA5+7m9PWoSUBFpSHHOJgFTdG1M2hBKgRtqZSsOVYZyFBoIdyaEfuc8O/4TYkKJiP34jHxXJ8qfEtjiMmV0fjNBdqyQY0uRhEqmGrmD/tdzgHKkYE9dQIXrj14eR8pyERFvF7HFrP0hA5NITy1K1obaV3+O8O+QjU1ktENQwls2jx7medstV51l6Kx7xfEU6Wovu9B6OXfJwFiJo0R2ojZzl/9xqhrpM+39+QlGm/Wkd9myJaSv/1K4nJbCJ9+TvVu9f4XzDCqotVzmIgyPF9/ZioA12Z65IYGpQkdh6A33/3QtDtGybhQrsQKznbI1B08ulALYZx2Wr5KHTXIr66wfZCkNKHVS9C1d8b+A4I6GeJ5+hOcjNvhKrGAQoZgf1Labpdt0NeiZCkH/80Ff9wsz/0T4a37AH47B5DN1z7pPadq0=
+  file:
+    - book.epub
+    - book.mobi
+    - book.pdf
+  "on":
+    repo: GITenberg/The-Case-of-the-Lamp-That-Went-Out_1832
+addons:
+  apt:
+    packages:
+    - xsltproc
+    - xvfb
+    - calibre
+    - python-pip
+    - git
+    - python-dev
+    - libjpeg-dev
+    - libpng-dev
+    - libfreetype6
+    - libfreetype6-dev
+    - zlib1g-dev
+    - python-lxml
+    - libxml2-dev
+    - libxslt1-dev
+    - tidy
